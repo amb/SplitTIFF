@@ -16,6 +16,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-i", type=str)
 parser.add_argument("-o", type=str)
 parser.add_argument("-p", "--preview", action="store_true")
+parser.add_argument("-n", "--normalize", action="store_true")
 
 args = parser.parse_args()
 
@@ -30,12 +31,14 @@ if args.i is not None and args.o is not None:
     print(data.shape, data.dtype)
     print(np.max(data), np.min(data))
 
-    data -= np.min(data)
-    data = np.float64(data)
-    data /= np.max(data)
-    data = np.int16(32768 * data)
+    if args.normalize:
+        print("Normalizing...")
+        data -= np.min(data)
+        data = np.float64(data)
+        data /= np.max(data)
+        data = np.int16(32768 * data)
 
-    print(np.max(data), np.min(data))
+        print(np.max(data), np.min(data))
 
     # Convert to PIL Image
     #img = Image.open(args.i)
