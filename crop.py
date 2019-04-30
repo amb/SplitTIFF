@@ -6,7 +6,7 @@ from PIL import Image
 
 # python .\crop.py -i LOLA_DEM.tiff -o hi-res -p
 
-rescale = 4
+rescale = 3
 resolution = 1024
 
 gdal.UseExceptions()
@@ -33,10 +33,13 @@ if args.i is not None and args.o is not None:
 
     if args.normalize:
         print("Normalizing...")
-        data -= np.min(data)
+        dmin = np.min(data)
+        data -= dmin
         data = np.float64(data)
-        data /= np.max(data)
-        data = np.int16(32768 * data)
+        dmax = np.max(data)
+        data /= dmax
+        data *= 32768
+        data = np.int16(data)
 
         print(np.max(data), np.min(data))
 
@@ -74,6 +77,7 @@ if args.i is not None and args.o is not None:
                 fname = args.o+"_"+repr(x)+"_"+repr(y)
 
                 if not args.preview:
+                    # Data format Unity3D terrain importer understands
                     otext = piece.tobytes('raw')
 
                     print("Preparing...")
@@ -83,9 +87,8 @@ if args.i is not None and args.o is not None:
                     with open(fname+".raw", "wb") as out_file:
                         out_file.write(ntext)
                 else:
-                    #tarr = np.asarray(piece)
-                    #print(np.max(tarr), np.min(tarr))
-                    #piece = piece.convert('RGB')
+                    # piece = piece.convert('RGB') # for JPEG
+                    # convert to 8 bit, leave this out for 16 bit PNG
                     piece = piece.point(con_table, 'L')
                     piece.save(fname+".png")
     else:
